@@ -4,6 +4,7 @@
 #include "polynomial.h"
 #include "extended_polynomial.h"
 #include "polynomial_list.h"
+#include "polynomial_template.h"
 
 using namespace std;
 
@@ -298,9 +299,97 @@ void lab6_demo() {
     std::cout << "Access to invalid coefficient: " << p.safeGetCoefficient(10) << std::endl;
     
     p.safeSetCoefficient(1, std::numeric_limits<double>::infinity());
-    
+
     std::cout << "Coefficient[1] after invalid set: " << p.safeGetCoefficient(1) << std::endl;
 }
 
-void lab7_demo() {}
+void lab7_demo() {
+    cout << "\n=== Lab 7: Templates ===" << endl;
+    
+    cout << "--- Integer Polynomial ---" << endl;
+    cout << "Enter order for integer polynomial: ";
+    int order;
+    cin >> order;
+    
+    vector<int> intCoeffs;
+    cout << "Enter " << (order + 1) << " integer coefficients:" << endl;
+    for (int i = 0; i <= order; i++) {
+        int coeff;
+        cout << "Coefficient for x^" << i << ": ";
+        cin >> coeff;
+        intCoeffs.push_back(coeff);
+    }
+    
+    PolynomialTemplate<int> intPoly(order, intCoeffs);
+    cout << "Integer polynomial: " << intPoly.toString() << endl;
+    
+    int xInt;
+    cout << "Enter integer x value: ";
+    cin >> xInt;
+    cout << "Value at x=" << xInt << ": " << intPoly.evaluate(xInt) << endl;
+    cout << "Using operator(): " << intPoly(xInt) << endl;
+    
+    cout << "\n--- Double Polynomial ---" << endl;
+    cout << "Enter order for double polynomial: ";
+    cin >> order;
+    
+    vector<double> doubleCoeffs;
+    cout << "Enter " << (order + 1) << " double coefficients:" << endl;
+    for (int i = 0; i <= order; i++) {
+        double coeff;
+        cout << "Coefficient for x^" << i << ": ";
+        cin >> coeff;
+        doubleCoeffs.push_back(coeff);
+    }
+    
+    PolynomialTemplate<double> doublePoly(order, doubleCoeffs);
+    cout << "Double polynomial: " << doublePoly.toString() << endl;
+    
+    double xDouble;
+    cout << "Enter double x value: ";
+    cin >> xDouble;
+    cout << "Value at x=" << xDouble << ": " << doublePoly.evaluate(xDouble) << endl;
+    
+    // Демонстрация операторов
+    cout << "\n--- Operator Demonstrations ---" << endl;
+    cout << "Creating another polynomial for operations..." << endl;
+    
+    vector<double> coeffs2 = {1.5, 2.5};
+    PolynomialTemplate<double> poly2(1, coeffs2);
+    cout << "Second polynomial: " << poly2.toString() << endl;
+    
+    PolynomialTemplate<double> sum = doublePoly + poly2;
+    cout << "Sum: " << sum.toString() << endl;
+    
+    PolynomialTemplate<double> diff = doublePoly - poly2;
+    cout << "Difference: " << diff.toString() << endl;
+    
+    cout << "\n--- Float Polynomial ---" << endl;
+    cout << "Enter order for float polynomial: ";
+    cin >> order;
+    
+    vector<float> floatCoeffs;
+    cout << "Enter " << (order + 1) << " float coefficients:" << endl;
+    for (int i = 0; i <= order; i++) {
+        float coeff;
+        cout << "Coefficient for x^" << i << ": ";
+        cin >> coeff;
+        floatCoeffs.push_back(coeff);
+    }
+    
+    PolynomialTemplate<float> floatPoly(order, floatCoeffs);
+    cout << "Float polynomial: " << floatPoly.toString() << endl;
+    
+    float xFloat;
+    cout << "Enter float x value: ";
+    cin >> xFloat;
+    cout << "Value at x=" << xFloat << ": " << floatPoly.evaluate(xFloat) << endl;
+    
+    cout << "\n--- Template Comparison ---" << endl;
+    cout << "All polynomials use the same template class but with different data types!" << endl;
+    cout << "intPoly type: " << typeid(intPoly).name() << endl;
+    cout << "doublePoly type: " << typeid(doublePoly).name() << endl;
+    cout << "floatPoly type: " << typeid(floatPoly).name() << endl;
+}
+
 void lab8_demo() {}
