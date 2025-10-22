@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include "extended_polynomial.h"
 #include "polynomial.h"
 
 using namespace std;
@@ -231,7 +232,31 @@ void lab3_demo() {
     }
 }
 
-void lab4_demo() {}
+void lab4_demo() {
+    std::cout << "\n=== Lab 4: Inheritance ===" << std::endl;
+    
+    std::vector<double> coeffs = {1.0, 2.0, 3.0};
+    std::vector<int> powers = {0, 1, 2};
+    
+    Polynomial basePoly(2, coeffs);
+    std::cout << "Base polynomial: " << basePoly.toString() << std::endl;
+    
+    PowerArrayPolynomial powerPoly(2, coeffs, powers);
+    std::cout << "Power array polynomial: " << powerPoly.toString() << std::endl;
+    
+    StringFormPolynomial stringPoly(2, coeffs);
+    std::cout << "String form polynomial: " << stringPoly.toString() << std::endl;
+    
+    Polynomial* polyPtr = &basePoly;
+    std::cout << "Base pointer to base: " << polyPtr->toString() << std::endl;
+    
+    polyPtr = &powerPoly;
+    std::cout << "Base pointer to derived (PowerArray): " << polyPtr->toString() << std::endl;
+    
+    polyPtr = &stringPoly;
+    std::cout << "Base pointer to derived (StringForm): " << polyPtr->toString() << std::endl;
+}
+
 void lab5_demo() {}
 void lab6_demo() {}
 void lab7_demo() {}
