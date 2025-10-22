@@ -12,13 +12,13 @@ protected:
     static int objectCount;
 
 public:
-    // Конструкторы
+    // CON/DEstructors
     Polynomial(); // по умолчанию
     Polynomial(int ord, const std::vector<double>& coeffs);
     Polynomial(const Polynomial& other);
     virtual ~Polynomial();
 
-    // Методы доступа
+    // Basic methods
     int getOrder() const;
     std::vector<double> getCoefficients() const;
     void setCoefficients(const std::vector<double>& coeffs);
@@ -30,6 +30,7 @@ public:
 
     static int getObjectCount();
 
+    // Operations
     Polynomial operator+(const Polynomial& other) const;
     Polynomial operator-(const Polynomial& other) const;
     Polynomial& operator++();
@@ -39,6 +40,16 @@ public:
     double operator()(double x) const; 
     double operator[](int index) const; 
     Polynomial& operator=(const Polynomial& other);
+
+    // IN/OUTput
+    friend std::ostream& operator<<(std::ostream& os, const Polynomial& poly);
+    friend std::istream& operator>>(std::istream& is, Polynomial& poly);
+
+    void saveToTextFile(const std::string& filename) const;
+    void loadFromTextFile(const std::string& filename);
+    void saveToBinaryFile(const std::string& filename) const;
+    void loadFromBinaryFile(const std::string& filename);
+
 };
 
 #endif

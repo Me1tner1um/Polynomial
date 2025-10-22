@@ -1,6 +1,7 @@
 #include "polynomial.h"
 #include <sstream>
 #include <iomanip>
+#include <fstream>
 
 int Polynomial::objectCount = 0;
 
@@ -178,3 +179,79 @@ Polynomial& Polynomial::operator=(const Polynomial& other) {
     }
     return *this;
 }
+
+
+
+
+// IN/OUTput
+std::ostream& operator<<(std::ostream& os, const Polynomial& poly) {
+    os << poly.toString();
+    return os;
+}
+
+std::istream& operator>>(std::istream& is, Polynomial& poly) {
+    std::cout << "Введите порядок многочлена: ";
+    is >> poly.order;
+    
+    poly.coefficients.clear();
+    std::cout << "Введите " << (poly.order + 1) << " коэффициентов: ";
+    for (int i = 0; i <= poly.order; i++) {
+        double coeff;
+        is >> coeff;
+        poly.coefficients.push_back(coeff);
+    }
+    
+    return is;
+}
+
+void Polynomial::saveToTextFile(const std::string& filename) const {
+    std::ofstream file(filename);
+    if (file.is_open()) {
+        file << order << std::endl;
+        for (double coeff : coefficients) {
+            file << coeff << " ";
+        }
+        file << std::endl;
+        file.close();
+    }
+}
+
+void Polynomial::loadFromTextFile(const std::string& filename) {
+    std::ifstream file(filename);
+    if (file.is_open()) {
+        file >> order;
+        coefficients.clear();
+        for (int i = 0; i <= order; i++) {
+            double coeff;
+            file >> coeff;
+            coefficients.push_back(coeff);
+        }
+        file.close();
+    }
+}
+
+void Polynomial::saveToBinaryFile(const std::string& filename) const {
+    std::ofstream file(filename, std::ios::binary);
+    if (file.is_open()) {
+        file.write(reinterpret_cast<const char*>(&order), sizeof(order));
+        for (double coeff : coefficients) {
+            file.write(reinterpret_cast<const char*>(&coeff), sizeof(coeff));
+        }
+        file.close();
+    }
+}
+
+void Polynomial::loadFromBinaryFile(const std::string& filename) {
+    std::ifstream file(filename, std::ios::binary);
+    if (file.is_open()) {
+        file.read(reinterpret_cast<char*>(&order), sizeof(order));
+        coefficients.clear();
+        for (int i = 0; i <= order; i++) {
+            double coeff;
+            file.read(reinterpret_cast<char*>(&coeff), sizeof(coeff));
+            coefficients.push_back(coeff);
+        }
+        file.close();
+    }
+}
+

@@ -184,7 +184,53 @@ void lab2_demo() {
     }
 }
 
-void lab3_demo() {}
+void lab3_demo() {
+    cout << "\n=== Lab 3: Input/Output Operations ===" << endl;
+    
+    cout << "--- Create Polynomial ---" << endl;
+    Polynomial p1 = inputPolynomial();
+    displayPolynomialInfo(p1);
+    
+    // Вывод в поток
+    cout << "\n--- Stream Output ---" << endl;
+    cout << "Using operator<<: " << p1 << endl;
+    
+    // Ввод из потока
+    cout << "\n--- Stream Input ---" << endl;
+    Polynomial p2;
+    cout << "Now let's input another polynomial using operator>>:" << endl;
+    cin >> p2;
+    cout << "You entered: " << p2 << endl;
+    
+    // Работа с файлами
+    cout << "\n--- File Operations ---" << endl;
+    string filename;
+    
+    cout << "Enter filename for text file (without extension): ";
+    cin >> filename;
+    string textFile = filename + ".txt";
+    string binaryFile = filename + ".bin";
+    
+    p1.saveToTextFile(textFile);
+    p1.saveToBinaryFile(binaryFile);
+    cout << "Polynomial saved to " << textFile << " and " << binaryFile << endl;
+    
+    // Загрузка из файлов
+    Polynomial p3, p4;
+    p3.loadFromTextFile(textFile);
+    p4.loadFromBinaryFile(binaryFile);
+    
+    cout << "Loaded from text file: " << p3 << endl;
+    cout << "Loaded from binary file: " << p4 << endl;
+    
+    // Проверка корректности
+    if (p1.toString() == p3.toString() && p1.toString() == p4.toString()) {
+        cout << "File operations completed successfully!" << endl;
+    } else {
+        cout << "Error in file operations!" << endl;
+    }
+}
+
 void lab4_demo() {}
 void lab5_demo() {}
 void lab6_demo() {}
