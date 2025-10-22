@@ -30,6 +30,14 @@ public:
 
     static int getObjectCount();
 
+    Polynomial operator+(const Polynomial& other) const;
+    Polynomial operator-(const Polynomial& other) const;
+    Polynomial& operator++();
+    Polynomial operator++(int); 
+    Polynomial& operator--(); 
+    Polynomial operator--(int); 
+    double operator()(double x) const; 
+    double operator[](int index) const; 
     Polynomial& operator=(const Polynomial& other);
 };
 

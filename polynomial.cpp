@@ -2,31 +2,30 @@
 #include <sstream>
 #include <iomanip>
 
-// Инициализация статического члена
 int Polynomial::objectCount = 0;
 
-// Конструктор по умолчанию
+// CON/DEstructors
 Polynomial::Polynomial() : order(0) {
     coefficients.push_back(0.0);
     objectCount++;
 }
 
-// Конструктор с параметрами
 Polynomial::Polynomial(int ord, const std::vector<double>& coeffs) : order(ord), coefficients(coeffs) {
     objectCount++;
 }
 
-// Конструктор копирования
 Polynomial::Polynomial(const Polynomial& other) : order(other.order), coefficients(other.coefficients) {
     objectCount++;
 }
 
-// Деструктор
 Polynomial::~Polynomial() {
     objectCount--;
 }
 
-// Методы доступа
+
+
+
+// Basic methods
 int Polynomial::getOrder() const {
     return order;
 }
@@ -40,7 +39,6 @@ void Polynomial::setCoefficients(const std::vector<double>& coeffs) {
     order = coeffs.size() - 1;
 }
 
-// Вычисление значения многочлена
 double Polynomial::evaluate(double x) const {
     double result = 0.0;
     double power = 1.0;
@@ -53,7 +51,6 @@ double Polynomial::evaluate(double x) const {
     return result;
 }
 
-// Строковое представление
 std::string Polynomial::toString() const {
     std::ostringstream oss;
     bool firstTerm = true;
@@ -95,26 +92,85 @@ std::string Polynomial::toString() const {
     return oss.str();
 }
 
-// Увеличение степени
 void Polynomial::increaseDegree() {
-    coefficients.push_back(0.0);
+    coefficients.insert(coefficients.begin(), 0.0);
     order++;
 }
 
-// Уменьшение степени
 void Polynomial::decreaseDegree() {
     if (order > 0) {
-        coefficients.pop_back();
+        coefficients.erase(coefficients.begin());
         order--;
     }
 }
 
-// Статический метод
 int Polynomial::getObjectCount() {
     return objectCount;
 }
 
-// Оператор присваивания
+
+
+
+// Operations
+Polynomial Polynomial::operator+(const Polynomial& other) const {
+    int maxOrder = std::max(order, other.order);
+    std::vector<double> resultCoeffs(maxOrder + 1, 0.0);
+    
+    for (int i = 0; i <= maxOrder; i++) {
+        double coeff1 = (i <= order) ? coefficients[i] : 0.0;
+        double coeff2 = (i <= other.order) ? other.coefficients[i] : 0.0;
+        resultCoeffs[i] = coeff1 + coeff2;
+    }
+    
+    return Polynomial(maxOrder, resultCoeffs);
+}
+
+Polynomial Polynomial::operator-(const Polynomial& other) const {
+    int maxOrder = std::max(order, other.order);
+    std::vector<double> resultCoeffs(maxOrder + 1, 0.0);
+    
+    for (int i = 0; i <= maxOrder; i++) {
+        double coeff1 = (i <= order) ? coefficients[i] : 0.0;
+        double coeff2 = (i <= other.order) ? other.coefficients[i] : 0.0;
+        resultCoeffs[i] = coeff1 - coeff2;
+    }
+    
+    return Polynomial(maxOrder, resultCoeffs);
+}
+
+Polynomial& Polynomial::operator++() {
+    increaseDegree();
+    return *this;
+}
+
+Polynomial Polynomial::operator++(int) {
+    Polynomial temp = *this;
+    increaseDegree();
+    return temp;
+}
+
+Polynomial& Polynomial::operator--() {
+    decreaseDegree();
+    return *this;
+}
+
+Polynomial Polynomial::operator--(int) {
+    Polynomial temp = *this;
+    decreaseDegree();
+    return temp;
+}
+
+double Polynomial::operator()(double x) const {
+    return evaluate(x);
+}
+
+double Polynomial::operator[](int index) const {
+    if (index < 0 || index > order) {
+        return 0.0;
+    }
+    return coefficients[index];
+}
+
 Polynomial& Polynomial::operator=(const Polynomial& other) {
     if (this != &other) {
         order = other.order;

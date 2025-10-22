@@ -119,9 +119,11 @@ void lab1_demo() {
     cout << "Original: " << p1.toString() << endl;
     
     p1.increaseDegree();
+    cout << p1.getOrder() << endl;
     cout << "After increasing degree: " << p1.toString() << endl;
     
     p1.decreaseDegree();
+    cout << p1.getOrder() << endl;
     cout << "After decreasing degree: " << p1.toString() << endl;
     
     // Создание второго многочлена для демонстрации
@@ -133,7 +135,55 @@ void lab1_demo() {
     cout << "\nNumber of Polynomial objects created: " << Polynomial::getObjectCount() << endl;
 }
 
-void lab2_demo() {}
+void lab2_demo() {
+    cout << "\n=== Lab 2: Operator Overloading ===" << endl;
+    
+    cout << "--- First Polynomial ---" << endl;
+    Polynomial p1 = inputPolynomial();
+    displayPolynomialInfo(p1);
+    
+    cout << "\n--- Second Polynomial ---" << endl;
+    Polynomial p2 = inputPolynomial();
+    displayPolynomialInfo(p2);
+    
+    cout << "\n--- Operator Demonstrations ---" << endl;
+    
+    // Сложение
+    Polynomial sum = p1 + p2;
+    cout << "p1 + p2 = " << sum.toString() << endl;
+    
+    // Вычитание
+    Polynomial diff = p1 - p2;
+    cout << "p1 - p2 = " << diff.toString() << endl;
+    
+    // Инкремент/декремент
+    cout << "\n--- Increment/Decrement Operations ---" << endl;
+    cout << "Original p1: " << p1.toString() << endl;
+    
+    ++p1;
+    cout << "After ++p1: " << p1.toString() << endl;
+    
+    --p1;
+    cout << "After --p1: " << p1.toString() << endl;
+    
+    // Оператор вызова функции
+    double x;
+    cout << "\nEnter x value to evaluate p1: ";
+    cin >> x;
+    cout << "p1(" << x << ") = " << p1(x) << endl;
+    
+    // Оператор индексирования
+    cout << "\n--- Indexing Operation ---" << endl;
+    int index;
+    cout << "Enter coefficient index to display (0 to " << p1.getOrder() << "): ";
+    cin >> index;
+    if (index >= 0 && index <= p1.getOrder()) {
+        cout << "p1[" << index << "] = " << p1[index] << endl;
+    } else {
+        cout << "Invalid index!" << endl;
+    }
+}
+
 void lab3_demo() {}
 void lab4_demo() {}
 void lab5_demo() {}
