@@ -1,8 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <limits>
-#include "extended_polynomial.h"
 #include "polynomial.h"
+#include "extended_polynomial.h"
+#include "polynomial_list.h"
 
 using namespace std;
 
@@ -257,7 +258,34 @@ void lab4_demo() {
     std::cout << "Base pointer to derived (StringForm): " << polyPtr->toString() << std::endl;
 }
 
-void lab5_demo() {}
+void lab5_demo() {
+    std::cout << "\n=== Lab 5: Dynamic Lists and Polymorphism ===" << std::endl;
+    
+    PolynomialList list;
+
+    std::vector<double> coeffs1 = {1.0, 2.0, 3.0};
+    std::vector<double> coeffs2 = {4.0, 5.0, 6.0};
+    std::vector<int> powers = {0, 1, 2};
+    
+    list.add(new Polynomial(2, coeffs1));
+    list.add(new PowerArrayPolynomial(2, coeffs2, powers));
+    list.add(new StringFormPolynomial(1, {7.0, 8.0}));
+    
+    list.displayAll();
+    
+    list.demonstratePolymorphism();
+    
+    Polynomial searchPoly(2, coeffs1);
+    int foundIndex = list.find(searchPoly);
+    std::cout << "Found polynomial at index: " << foundIndex << std::endl;
+    
+    if (foundIndex != -1) {
+        list.remove(foundIndex);
+        std::cout << "After removal:" << std::endl;
+        list.displayAll();
+    }
+}
+
 void lab6_demo() {}
 void lab7_demo() {}
 void lab8_demo() {}
