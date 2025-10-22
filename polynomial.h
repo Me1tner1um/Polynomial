@@ -4,6 +4,18 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <stdexcept>
+#include <cmath>
+
+class PolynomialException : public std::exception {
+private:
+    std::string message;
+public:
+    PolynomialException(const std::string& msg) : message(msg) {}
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+};
 
 class Polynomial {
 protected:
@@ -49,6 +61,11 @@ public:
     void loadFromTextFile(const std::string& filename);
     void saveToBinaryFile(const std::string& filename) const;
     void loadFromBinaryFile(const std::string& filename);
+
+    // Exceptions
+    double safeEvaluate(double x) const;
+    double safeGetCoefficient(int index) const;
+    void safeSetCoefficient(int index, double value);
 
 };
 

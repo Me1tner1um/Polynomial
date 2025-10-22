@@ -286,6 +286,21 @@ void lab5_demo() {
     }
 }
 
-void lab6_demo() {}
+void lab6_demo() {
+    std::cout << "\n=== Lab 6: Exception Handling ===" << std::endl;
+    
+    std::vector<double> coeffs = {1.0, 2.0, 3.0};
+    Polynomial p(2, coeffs);
+    
+    std::cout << "Normal evaluation at x=2: " << p.safeEvaluate(2.0) << std::endl;
+    
+    std::cout << "Evaluation with invalid x: " << p.safeEvaluate(std::numeric_limits<double>::quiet_NaN()) << std::endl;
+    std::cout << "Access to invalid coefficient: " << p.safeGetCoefficient(10) << std::endl;
+    
+    p.safeSetCoefficient(1, std::numeric_limits<double>::infinity());
+    
+    std::cout << "Coefficient[1] after invalid set: " << p.safeGetCoefficient(1) << std::endl;
+}
+
 void lab7_demo() {}
 void lab8_demo() {}

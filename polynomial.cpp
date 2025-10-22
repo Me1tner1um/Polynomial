@@ -255,3 +255,47 @@ void Polynomial::loadFromBinaryFile(const std::string& filename) {
     }
 }
 
+
+
+
+// Exceptions
+double Polynomial::safeEvaluate(double x) const {
+    try {
+        if (std::isnan(x) || std::isinf(x)) {
+            throw PolynomialException("Invalid x value for evaluation");
+        }
+        return evaluate(x);
+    }
+    catch (const PolynomialException& e) {
+        std::cerr << "Evaluation error: " << e.what() << std::endl;
+        return 0.0;
+    }
+}
+
+double Polynomial::safeGetCoefficient(int index) const {
+    try {
+        if (index < 0 || index > order) {
+            throw PolynomialException("Index out of bounds");
+        }
+        return coefficients[index];
+    }
+    catch (const PolynomialException& e) {
+        std::cerr << "Coefficient access error: " << e.what() << std::endl;
+        return 0.0;
+    }
+}
+
+void Polynomial::safeSetCoefficient(int index, double value) {
+    try {
+        if (index < 0 || index > order) {
+            throw PolynomialException("Index out of bounds");
+        }
+        if (std::isnan(value) || std::isinf(value)) {
+            throw PolynomialException("Invalid coefficient value");
+        }
+        coefficients[index] = value;
+    }
+    catch (const PolynomialException& e) {
+        std::cerr << "Coefficient setting error: " << e.what() << std::endl;
+    }
+}
