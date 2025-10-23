@@ -180,6 +180,24 @@ Polynomial& Polynomial::operator=(const Polynomial& other) {
     return *this;
 }
 
+bool Polynomial::operator==(const Polynomial& other) const {
+    if (order != other.order) {
+        return false;
+    }
+    
+    for (int i = 0; i <= order; i++) {
+        if (std::abs(coefficients[i] - other.coefficients[i]) > 1e-10) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool Polynomial::operator!=(const Polynomial& other) const {
+    return !(*this == other);
+}
+
 
 
 

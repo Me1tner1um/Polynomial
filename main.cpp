@@ -5,6 +5,7 @@
 #include "extended_polynomial.h"
 #include "polynomial_list.h"
 #include "polynomial_template.h"
+#include "polynomial_stl.h"
 
 using namespace std;
 
@@ -392,4 +393,75 @@ void lab7_demo() {
     cout << "floatPoly type: " << typeid(floatPoly).name() << endl;
 }
 
-void lab8_demo() {}
+void lab8_demo() {
+    cout << "\n=== Lab 8: STL Analysis ===" << endl;
+    
+    int dataSize;
+    cout << "Enter number of test polynomials to generate: ";
+    cin >> dataSize;
+    
+    PolynomialSTLAnalysis analysis;
+    analysis.generateTestData(dataSize);
+    analysis.runAllAnalysis();
+    
+    // Дополнительная демонстрация с пользовательскими данными
+    cout << "\n--- Custom STL Operations ---" << endl;
+    vector<Polynomial> customPolynomials;
+    
+    int numCustom;
+    cout << "How many polynomials do you want to add for STL operations? ";
+    cin >> numCustom;
+    
+    for (int i = 0; i < numCustom; i++) {
+        cout << "\nPolynomial " << (i + 1) << ":" << endl;
+        customPolynomials.push_back(inputPolynomial());
+    }
+    
+    // STL алгоритмы
+    cout << "\n--- STL Algorithms on Custom Data ---" << endl;
+    
+    // Поиск
+    if (!customPolynomials.empty()) {
+        cout << "Enter order to search for: ";
+        int searchOrder;
+        cin >> searchOrder;
+        
+        auto it = find_if(customPolynomials.begin(), customPolynomials.end(),
+                         [searchOrder](const Polynomial& p) { 
+                             return p.getOrder() == searchOrder; 
+                         });
+        
+        if (it != customPolynomials.end()) {
+            cout << "Found polynomial with order " << searchOrder << ": " << it->toString() << endl;
+        } else {
+            cout << "No polynomial with order " << searchOrder << " found" << endl;
+        }
+    }
+    
+    // Сортировка
+    cout << "\n--- Sorting Polynomials ---" << endl;
+    sort(customPolynomials.begin(), customPolynomials.end(),
+         [](const Polynomial& a, const Polynomial& b) {
+             return a.toString() < b.toString();
+         });
+    
+    cout << "Sorted polynomials:" << endl;
+    for (const auto& poly : customPolynomials) {
+        cout << "  " << poly.toString() << endl;
+    }
+    
+    // Подсчет
+    if (!customPolynomials.empty()) {
+        cout << "\nEnter order to count: ";
+        int countOrder;
+        cin >> countOrder;
+        
+        int count = count_if(customPolynomials.begin(), customPolynomials.end(),
+                           [countOrder](const Polynomial& p) { 
+                               return p.getOrder() == countOrder; 
+                           });
+        cout << "Number of polynomials with order " << countOrder << ": " << count << endl;
+    }
+    
+    cout << "\nSTL analysis completed!" << endl;
+}

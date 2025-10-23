@@ -52,6 +52,8 @@ public:
     double operator()(double x) const; 
     double operator[](int index) const; 
     Polynomial& operator=(const Polynomial& other);
+    bool operator==(const Polynomial& other) const;
+    bool operator!=(const Polynomial& other) const;
 
     // IN/OUTput
     friend std::ostream& operator<<(std::ostream& os, const Polynomial& poly);
