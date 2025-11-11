@@ -19,7 +19,7 @@ public:
 
 class Polynomial {
 protected:
-    int order;;
+    int order;
     std::vector<double> coefficients;
     static int objectCount;
 

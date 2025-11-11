@@ -123,11 +123,9 @@ void lab1_demo() {
     cout << "Original: " << p1.toString() << endl;
     
     p1.increaseDegree();
-    cout << p1.getOrder() << endl;
     cout << "After increasing degree: " << p1.toString() << endl;
     
     p1.decreaseDegree();
-    cout << p1.getOrder() << endl;
     cout << "After decreasing degree: " << p1.toString() << endl;
     
     // Создание второго многочлена для демонстрации

@@ -208,11 +208,11 @@ std::ostream& operator<<(std::ostream& os, const Polynomial& poly) {
 }
 
 std::istream& operator>>(std::istream& is, Polynomial& poly) {
-    std::cout << "Введите порядок многочлена: ";
+    std::cout << "Enter the order (degree) of the polynomial: ";
     is >> poly.order;
     
     poly.coefficients.clear();
-    std::cout << "Введите " << (poly.order + 1) << " коэффициентов: ";
+    std::cout << "Enter " << (poly.order + 1) << " coefficients: ";
     for (int i = 0; i <= poly.order; i++) {
         double coeff;
         is >> coeff;
