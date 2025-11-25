@@ -2,10 +2,10 @@
 #define POLYNOMIAL_H
 
 #include <iostream>
-#include <vector>
 #include <string>
 #include <stdexcept>
 #include <cmath>
+#include <fstream>
 
 class PolynomialException : public std::exception {
 private:
@@ -20,20 +20,20 @@ public:
 class Polynomial {
 protected:
     int order;
-    std::vector<double> coefficients;
+    double* coefficients;
     static int objectCount;
 
 public:
     // CON/DEstructors
     Polynomial(); // по умолчанию
-    Polynomial(int ord, const std::vector<double>& coeffs);
+    Polynomial(int ord, const double* coeffs);
     Polynomial(const Polynomial& other);
     virtual ~Polynomial();
 
     // Basic methods
     int getOrder() const;
-    std::vector<double> getCoefficients() const;
-    void setCoefficients(const std::vector<double>& coeffs);
+    double* getCoefficients() const;
+    void setCoefficients(int ord, const double* coeffs);
 
     double evaluate(double x) const;
     virtual std::string toString() const;
@@ -49,6 +49,7 @@ public:
     Polynomial operator++(int); 
     Polynomial& operator--(); 
     Polynomial operator--(int); 
+    friend Polynomial operator+(double num, const Polynomial& other);
     double operator()(double x) const; 
     double operator[](int index) const; 
     Polynomial& operator=(const Polynomial& other);
@@ -58,6 +59,8 @@ public:
     // IN/OUTput
     friend std::ostream& operator<<(std::ostream& os, const Polynomial& poly);
     friend std::istream& operator>>(std::istream& is, Polynomial& poly);
+    friend std::ofstream& operator<<(std::ofstream& ofs, const Polynomial& poly);
+    friend std::ifstream& operator>>(std::ifstream& ifs, Polynomial& poly);
 
     void saveToTextFile(const std::string& filename) const;
     void loadFromTextFile(const std::string& filename);

@@ -2,7 +2,6 @@
 #define POLYNOMIAL_TEMPLATE_H
 
 #include <iostream>
-#include <vector>
 #include <string>
 #include <sstream>
 
@@ -10,12 +9,14 @@ template<typename T>
 class PolynomialTemplate {
 private:
     int order;
-    std::vector<T> coefficients;
+    T* coefficients;
 
 public:
     // Конструкторы
     PolynomialTemplate();
-    PolynomialTemplate(int ord, const std::vector<T>& coeffs);
+    PolynomialTemplate(int ord, const T* coeffs);
+    PolynomialTemplate(const PolynomialTemplate<T>& other);
+    ~PolynomialTemplate();
     
     // Методы
     T evaluate(T x) const;
@@ -23,13 +24,16 @@ public:
     
     // Геттеры и сеттеры
     int getOrder() const;
-    std::vector<T> getCoefficients() const;
-    void setCoefficients(const std::vector<T>& coeffs);
+    T* getCoefficients() const;
+    void setCoefficients(int ord, const T* coeffs);
     
     // Операторы
     PolynomialTemplate<T> operator+(const PolynomialTemplate<T>& other) const;
     PolynomialTemplate<T> operator-(const PolynomialTemplate<T>& other) const;
     T operator()(T x) const;
+    
+    // Присваивание
+    PolynomialTemplate<T>& operator=(const PolynomialTemplate<T>& other);
 };
 
 #endif

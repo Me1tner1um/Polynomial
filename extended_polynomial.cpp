@@ -1,39 +1,67 @@
 #include "extended_polynomial.h"
 #include <sstream>
 
-PowerArrayPolynomial::PowerArrayPolynomial() : Polynomial() {}
+// PowerArrayPolynomial implementation
+PowerArrayPolynomial::PowerArrayPolynomial() : Polynomial(), powerIndices(nullptr), powerCount(0) {}
 
-PowerArrayPolynomial::PowerArrayPolynomial(int ord, const std::vector<double>& coeffs, 
-                                         const std::vector<int>& powers) 
-    : Polynomial(ord, coeffs), powerIndices(powers) {}
-
-PowerArrayPolynomial::PowerArrayPolynomial(const PowerArrayPolynomial& other)
-    : Polynomial(other), powerIndices(other.powerIndices) {}
-
-std::vector<int> PowerArrayPolynomial::getPowerIndices() const {
-    return powerIndices;
+PowerArrayPolynomial::PowerArrayPolynomial(int ord, const double* coeffs, const int* powers, int powerCnt) 
+    : Polynomial(ord, coeffs), powerCount(powerCnt) {
+    powerIndices = new int[powerCount];
+    for (int i = 0; i < powerCount; i++) {
+        powerIndices[i] = powers[i];
+    }
 }
 
-void PowerArrayPolynomial::setPowerIndices(const std::vector<int>& powers) {
-    powerIndices = powers;
+PowerArrayPolynomial::PowerArrayPolynomial(const PowerArrayPolynomial& other)
+    : Polynomial(other), powerCount(other.powerCount) {
+    powerIndices = new int[powerCount];
+    for (int i = 0; i < powerCount; i++) {
+        powerIndices[i] = other.powerIndices[i];
+    }
+}
+
+PowerArrayPolynomial::~PowerArrayPolynomial() {
+    delete[] powerIndices;
+}
+
+int* PowerArrayPolynomial::getPowerIndices() const {
+    int* copy = new int[powerCount];
+    for (int i = 0; i < powerCount; i++) {
+        copy[i] = powerIndices[i];
+    }
+    return copy;
+}
+
+int PowerArrayPolynomial::getPowerCount() const {
+    return powerCount;
+}
+
+void PowerArrayPolynomial::setPowerIndices(const int* powers, int count) {
+    delete[] powerIndices;
+    powerCount = count;
+    powerIndices = new int[powerCount];
+    for (int i = 0; i < powerCount; i++) {
+        powerIndices[i] = powers[i];
+    }
 }
 
 std::string PowerArrayPolynomial::toString() const {
     std::ostringstream oss;
     oss << "Polynomial with power indices: ";
-    for (size_t i = 0; i < powerIndices.size(); i++) {
+    for (int i = 0; i < powerCount; i++) {
         oss << powerIndices[i];
-        if (i < powerIndices.size() - 1) oss << ", ";
+        if (i < powerCount - 1) oss << ", ";
     }
     oss << " | " << Polynomial::toString();
     return oss.str();
 }
 
+// StringFormPolynomial implementation
 StringFormPolynomial::StringFormPolynomial() : Polynomial() {
     updateFormattedString();
 }
 
-StringFormPolynomial::StringFormPolynomial(int ord, const std::vector<double>& coeffs)
+StringFormPolynomial::StringFormPolynomial(int ord, const double* coeffs)
     : Polynomial(ord, coeffs) {
     updateFormattedString();
 }

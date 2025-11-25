@@ -1,99 +1,176 @@
 #include "polynomial_stl.h"
 #include <iostream>
+#include <cstring>
+
+PolynomialSTLAnalysis::PolynomialSTLAnalysis() : polynomialArray(nullptr), arraySize(0) {}
+
+PolynomialSTLAnalysis::~PolynomialSTLAnalysis() {
+    if (polynomialArray != nullptr) {
+        for (int i = 0; i < arraySize; i++) {
+            delete polynomialArray[i];
+        }
+        delete[] polynomialArray;
+    }
+}
 
 void PolynomialSTLAnalysis::generateTestData(int count) {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> dis(-10.0, 10.0);
+    // Очистка предыдущих данных
+    if (polynomialArray != nullptr) {
+        for (int i = 0; i < arraySize; i++) {
+            delete polynomialArray[i];
+        }
+        delete[] polynomialArray;
+    }
     
-    polynomialVector.clear();
+    polynomialArray = new Polynomial*[count];
+    arraySize = count;
+    
     polynomialList.clear();
     polynomialSet.clear();
     polynomialMultiSet.clear();
     polynomialMap.clear();
     polynomialMultiMap.clear();
     
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(-10.0, 10.0);
+    
     for (int i = 0; i < count; i++) {
-        std::vector<double> coeffs = {dis(gen), dis(gen), dis(gen)}; // 2nd degree
-        Polynomial poly(2, coeffs);
+        double* coeffs = new double[3];
+        coeffs[0] = dis(gen);
+        coeffs[1] = dis(gen);
+        coeffs[2] = dis(gen);
         
-        polynomialVector.push_back(poly);
-        polynomialList.push_back(poly);
-        polynomialSet.insert(poly.toString());
-        polynomialMultiSet.insert(poly.toString());
-        polynomialMap[i] = poly;
-        polynomialMultiMap.insert({i % 5, poly});
+        Polynomial* poly = new Polynomial(2, coeffs);
+        
+        polynomialArray[i] = poly;
+        polynomialList.push_back(*poly);
+        polynomialSet.insert(poly->toString());
+        polynomialMultiSet.insert(poly->toString());
+        polynomialMap[i] = *poly;
+        polynomialMultiMap.insert({i % 5, *poly});
+        
+        delete[] coeffs;
     }
 }
 
-void PolynomialSTLAnalysis::analyzeVectorOperations() {
-    std::cout << "=== Vector Operations Analysis ===" << std::endl;
+void PolynomialSTLAnalysis::analyzeArrayOperations() {
+    std::cout << "=== Array Operations Analysis ===" << std::endl;
     
-    // Добавление
-    measureTime<std::vector<Polynomial>>("Vector Push Back", [this]() {
-        std::vector<Polynomial> temp;
-        for (const auto& poly : polynomialVector) {
-            temp.push_back(poly);
+    // Копирование массива
+    measureTime<Polynomial**>("Array Copy", [this]() {
+        Polynomial** temp = new Polynomial*[arraySize];
+        for (int i = 0; i < arraySize; i++) {
+            double* coeffs = polynomialArray[i]->getCoefficients();
+            temp[i] = new Polynomial(polynomialArray[i]->getOrder(), coeffs);
+            delete[] coeffs;
+        }
+        
+        // Очистка временного массива
+        for (int i = 0; i < arraySize; i++) {
+            delete temp[i];
+        }
+        delete[] temp;
+    });
+    
+    // Поиск в массиве
+    measureTime<Polynomial**>("Array Find", [this]() {
+        if (arraySize > 0) {
+            Polynomial* target = polynomialArray[0];
+            for (int i = 0; i < arraySize; i++) {
+                if (*polynomialArray[i] == *target) {
+                    break;
+                }
+            }
         }
     });
     
-    // Удаление
-    measureTime<std::vector<Polynomial>>("Vector Erase", [this]() {
-        auto temp = polynomialVector;
-        if (!temp.empty()) {
-            temp.erase(temp.begin());
+    // Сортировка массива (пузырьковая сортировка)
+    measureTime<Polynomial**>("Array Sort", [this]() {
+        if (arraySize > 1) {
+            Polynomial** temp = new Polynomial*[arraySize];
+            for (int i = 0; i < arraySize; i++) {
+                double* coeffs = polynomialArray[i]->getCoefficients();
+                temp[i] = new Polynomial(polynomialArray[i]->getOrder(), coeffs);
+                delete[] coeffs;
+            }
+            
+            // Пузырьковая сортировка по строковому представлению
+            for (int i = 0; i < arraySize - 1; i++) {
+                for (int j = 0; j < arraySize - i - 1; j++) {
+                    if (temp[j]->toString() > temp[j + 1]->toString()) {
+                        Polynomial* swap = temp[j];
+                        temp[j] = temp[j + 1];
+                        temp[j + 1] = swap;
+                    }
+                }
+            }
+            
+            // Очистка временного массива
+            for (int i = 0; i < arraySize; i++) {
+                delete temp[i];
+            }
+            delete[] temp;
         }
     });
     
-    // Поиск
-    measureTime<std::vector<Polynomial>>("Vector Find", [this]() {
-        if (!polynomialVector.empty()) {
-            auto it = std::find(polynomialVector.begin(), polynomialVector.end(), 
-                               polynomialVector[0]);
+    // Линейный обход массива
+    measureTime<Polynomial**>("Array Traversal", [this]() {
+        for (int i = 0; i < arraySize; i++) {
+            polynomialArray[i]->toString();
         }
-    });
-    
-    // Сортировка
-    measureTime<std::vector<Polynomial>>("Vector Sort", [this]() {
-        auto temp = polynomialVector;
-        std::sort(temp.begin(), temp.end(), 
-                 [](const Polynomial& a, const Polynomial& b) {
-                     return a.toString() < b.toString();
-                 });
     });
 }
 
 void PolynomialSTLAnalysis::analyzeSetOperations() {
     std::cout << "=== Set Operations Analysis ===" << std::endl;
     
-    // Вставка
+    // Вставка в set
     measureTime<std::set<std::string>>("Set Insert", [this]() {
         std::set<std::string> temp;
-        for (const auto& poly : polynomialVector) {
-            temp.insert(poly.toString());
+        for (int i = 0; i < arraySize; i++) {
+            temp.insert(polynomialArray[i]->toString());
         }
     });
     
-    // Поиск
+    // Поиск в set
     measureTime<std::set<std::string>>("Set Find", [this]() {
-        if (!polynomialSet.empty()) {
-            auto it = polynomialSet.find(polynomialVector[0].toString());
+        if (!polynomialSet.empty() && arraySize > 0) {
+            auto it = polynomialSet.find(polynomialArray[0]->toString());
         }
     });
     
-    // Удаление
+    // Удаление из set
     measureTime<std::set<std::string>>("Set Erase", [this]() {
         auto temp = polynomialSet;
         if (!temp.empty()) {
             temp.erase(temp.begin());
         }
     });
+    
+    // Обход set
+    measureTime<std::set<std::string>>("Set Traversal", [this]() {
+        for (const auto& str : polynomialSet) {
+            std::string temp = str;
+        }
+    });
 }
 
 void PolynomialSTLAnalysis::runAllAnalysis() {
+    std::cout << "Generating test data..." << std::endl;
     generateTestData(1000);
-    analyzeVectorOperations();
+    
+    std::cout << "\nPerforming STL analysis..." << std::endl;
+    analyzeArrayOperations();
     analyzeSetOperations();
+    
+    std::cout << "\nAnalysis completed!" << std::endl;
+    std::cout << "Array size: " << arraySize << std::endl;
+    std::cout << "List size: " << polynomialList.size() << std::endl;
+    std::cout << "Set size: " << polynomialSet.size() << std::endl;
+    std::cout << "Multiset size: " << polynomialMultiSet.size() << std::endl;
+    std::cout << "Map size: " << polynomialMap.size() << std::endl;
+    std::cout << "Multimap size: " << polynomialMultiMap.size() << std::endl;
 }
 
 template<typename Container>

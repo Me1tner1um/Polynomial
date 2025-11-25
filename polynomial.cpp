@@ -1,43 +1,57 @@
 #include "polynomial.h"
 #include <sstream>
 #include <iomanip>
-#include <fstream>
 
 int Polynomial::objectCount = 0;
 
 // CON/DEstructors
 Polynomial::Polynomial() : order(0) {
-    coefficients.push_back(0.0);
+    coefficients = new double[1];
+    coefficients[0] = 0.0;
     objectCount++;
 }
 
-Polynomial::Polynomial(int ord, const std::vector<double>& coeffs) : order(ord), coefficients(coeffs) {
+Polynomial::Polynomial(int ord, const double* coeffs) : order(ord) {
+    coefficients = new double[order + 1];
+    for (int i = 0; i <= order; i++) {
+        coefficients[i] = coeffs[i];
+    }
     objectCount++;
 }
 
-Polynomial::Polynomial(const Polynomial& other) : order(other.order), coefficients(other.coefficients) {
+Polynomial::Polynomial(const Polynomial& other) : order(other.order) {
+    coefficients = new double[order + 1];
+    for (int i = 0; i <= order; i++) {
+        coefficients[i] = other.coefficients[i];
+    }
     objectCount++;
 }
 
 Polynomial::~Polynomial() {
+    delete[] coefficients;
     objectCount--;
 }
-
-
-
 
 // Basic methods
 int Polynomial::getOrder() const {
     return order;
 }
 
-std::vector<double> Polynomial::getCoefficients() const {
-    return coefficients;
+double* Polynomial::getCoefficients() const {
+    double* copy = new double[order + 1];
+    for (int i = 0; i <= order; i++) {
+        copy[i] = coefficients[i];
+    }
+    return copy;
 }
 
-void Polynomial::setCoefficients(const std::vector<double>& coeffs) {
-    coefficients = coeffs;
-    order = coeffs.size() - 1;
+void Polynomial::setCoefficients(int ord, const double* coeffs) {
+    delete[] coefficients;
+    order = ord;
+    coefficients = new double[order + 1];
+    for (int i = 0; i <= order; i++) {
+        coefficients[i] = coeffs[i];
+    }
 }
 
 double Polynomial::evaluate(double x) const {
@@ -94,13 +108,24 @@ std::string Polynomial::toString() const {
 }
 
 void Polynomial::increaseDegree() {
-    coefficients.insert(coefficients.begin(), 0.0);
+    double* newCoeffs = new double[order + 2];
+    newCoeffs[0] = 0.0;
+    for (int i = 0; i <= order; i++) {
+        newCoeffs[i + 1] = coefficients[i];
+    }
+    delete[] coefficients;
+    coefficients = newCoeffs;
     order++;
 }
 
 void Polynomial::decreaseDegree() {
     if (order > 0) {
-        coefficients.erase(coefficients.begin());
+        double* newCoeffs = new double[order];
+        for (int i = 0; i < order; i++) {
+            newCoeffs[i] = coefficients[i + 1];
+        }
+        delete[] coefficients;
+        coefficients = newCoeffs;
         order--;
     }
 }
@@ -109,13 +134,10 @@ int Polynomial::getObjectCount() {
     return objectCount;
 }
 
-
-
-
 // Operations
 Polynomial Polynomial::operator+(const Polynomial& other) const {
     int maxOrder = std::max(order, other.order);
-    std::vector<double> resultCoeffs(maxOrder + 1, 0.0);
+    double* resultCoeffs = new double[maxOrder + 1];
     
     for (int i = 0; i <= maxOrder; i++) {
         double coeff1 = (i <= order) ? coefficients[i] : 0.0;
@@ -123,12 +145,14 @@ Polynomial Polynomial::operator+(const Polynomial& other) const {
         resultCoeffs[i] = coeff1 + coeff2;
     }
     
-    return Polynomial(maxOrder, resultCoeffs);
+    Polynomial result(maxOrder, resultCoeffs);
+    delete[] resultCoeffs;
+    return result;
 }
 
 Polynomial Polynomial::operator-(const Polynomial& other) const {
     int maxOrder = std::max(order, other.order);
-    std::vector<double> resultCoeffs(maxOrder + 1, 0.0);
+    double* resultCoeffs = new double[maxOrder + 1];
     
     for (int i = 0; i <= maxOrder; i++) {
         double coeff1 = (i <= order) ? coefficients[i] : 0.0;
@@ -136,7 +160,9 @@ Polynomial Polynomial::operator-(const Polynomial& other) const {
         resultCoeffs[i] = coeff1 - coeff2;
     }
     
-    return Polynomial(maxOrder, resultCoeffs);
+    Polynomial result(maxOrder, resultCoeffs);
+    delete[] resultCoeffs;
+    return result;
 }
 
 Polynomial& Polynomial::operator++() {
@@ -161,6 +187,20 @@ Polynomial Polynomial::operator--(int) {
     return temp;
 }
 
+Polynomial operator+(double num, const Polynomial& other) {
+    int order = other.order;
+    double* resultCoeffs = new double[order + 1];
+
+    resultCoeffs[0] = other.coefficients[0] + num;
+
+    for (int i = 1; i < order; i++) {
+        resultCoeffs[i] = other.coefficients[i];
+    }
+
+    Polynomial result(order, resultCoeffs);
+    return result;
+}
+
 double Polynomial::operator()(double x) const {
     return evaluate(x);
 }
@@ -174,8 +214,12 @@ double Polynomial::operator[](int index) const {
 
 Polynomial& Polynomial::operator=(const Polynomial& other) {
     if (this != &other) {
+        delete[] coefficients;
         order = other.order;
-        coefficients = other.coefficients;
+        coefficients = new double[order + 1];
+        for (int i = 0; i <= order; i++) {
+            coefficients[i] = other.coefficients[i];
+        }
     }
     return *this;
 }
@@ -198,9 +242,6 @@ bool Polynomial::operator!=(const Polynomial& other) const {
     return !(*this == other);
 }
 
-
-
-
 // IN/OUTput
 std::ostream& operator<<(std::ostream& os, const Polynomial& poly) {
     os << poly.toString();
@@ -211,23 +252,46 @@ std::istream& operator>>(std::istream& is, Polynomial& poly) {
     std::cout << "Enter the order (degree) of the polynomial: ";
     is >> poly.order;
     
-    poly.coefficients.clear();
+    delete[] poly.coefficients;
+    poly.coefficients = new double[poly.order + 1];
+    
     std::cout << "Enter " << (poly.order + 1) << " coefficients: ";
     for (int i = 0; i <= poly.order; i++) {
-        double coeff;
-        is >> coeff;
-        poly.coefficients.push_back(coeff);
+        is >> poly.coefficients[i];
     }
     
     return is;
+}
+
+std::ofstream& operator<<(std::ofstream& ofs, const Polynomial& poly) {
+    if (ofs.is_open()) {
+        ofs << poly.order << std::endl;
+        for (int i = 0; i <= poly.order; i++) {
+            ofs << poly.coefficients[i] << " ";
+        }
+        ofs << std::endl;
+    }
+    return ofs;
+}
+
+std::ifstream& operator>>(std::ifstream& ifs, Polynomial& poly) {
+    if (ifs.is_open()) {
+        ifs >> poly.order;
+        delete[] poly.coefficients;
+        poly.coefficients = new double[poly.order + 1];
+        for (int i = 0; i <= poly.order; i++) {
+            ifs >> poly.coefficients[i];
+        }
+    }
+    return ifs;
 }
 
 void Polynomial::saveToTextFile(const std::string& filename) const {
     std::ofstream file(filename);
     if (file.is_open()) {
         file << order << std::endl;
-        for (double coeff : coefficients) {
-            file << coeff << " ";
+        for (int i = 0; i <= order; i++) {
+            file << coefficients[i] << " ";
         }
         file << std::endl;
         file.close();
@@ -238,11 +302,10 @@ void Polynomial::loadFromTextFile(const std::string& filename) {
     std::ifstream file(filename);
     if (file.is_open()) {
         file >> order;
-        coefficients.clear();
+        delete[] coefficients;
+        coefficients = new double[order + 1];
         for (int i = 0; i <= order; i++) {
-            double coeff;
-            file >> coeff;
-            coefficients.push_back(coeff);
+            file >> coefficients[i];
         }
         file.close();
     }
@@ -252,8 +315,8 @@ void Polynomial::saveToBinaryFile(const std::string& filename) const {
     std::ofstream file(filename, std::ios::binary);
     if (file.is_open()) {
         file.write(reinterpret_cast<const char*>(&order), sizeof(order));
-        for (double coeff : coefficients) {
-            file.write(reinterpret_cast<const char*>(&coeff), sizeof(coeff));
+        for (int i = 0; i <= order; i++) {
+            file.write(reinterpret_cast<const char*>(&coefficients[i]), sizeof(coefficients[i]));
         }
         file.close();
     }
@@ -263,18 +326,14 @@ void Polynomial::loadFromBinaryFile(const std::string& filename) {
     std::ifstream file(filename, std::ios::binary);
     if (file.is_open()) {
         file.read(reinterpret_cast<char*>(&order), sizeof(order));
-        coefficients.clear();
+        delete[] coefficients;
+        coefficients = new double[order + 1];
         for (int i = 0; i <= order; i++) {
-            double coeff;
-            file.read(reinterpret_cast<char*>(&coeff), sizeof(coeff));
-            coefficients.push_back(coeff);
+            file.read(reinterpret_cast<char*>(&coefficients[i]), sizeof(coefficients[i]));
         }
         file.close();
     }
 }
-
-
-
 
 // Exceptions
 double Polynomial::safeEvaluate(double x) const {

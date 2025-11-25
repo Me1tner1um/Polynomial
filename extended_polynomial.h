@@ -2,21 +2,22 @@
 #define EXTENDED_POLYNOMIAL_H
 
 #include "polynomial.h"
-#include <vector>
-#include <string>
 
 // Класс с массивами степеней
 class PowerArrayPolynomial : public Polynomial {
 private:
-    std::vector<int> powerIndices;
+    int* powerIndices;
+    int powerCount;
 
 public:
     PowerArrayPolynomial();
-    PowerArrayPolynomial(int ord, const std::vector<double>& coeffs, const std::vector<int>& powers);
+    PowerArrayPolynomial(int ord, const double* coeffs, const int* powers, int powerCnt);
     PowerArrayPolynomial(const PowerArrayPolynomial& other);
+    ~PowerArrayPolynomial();
     
-    std::vector<int> getPowerIndices() const;
-    void setPowerIndices(const std::vector<int>& powers);
+    int* getPowerIndices() const;
+    int getPowerCount() const;
+    void setPowerIndices(const int* powers, int count);
     
     std::string toString() const override;
 };
@@ -28,7 +29,7 @@ private:
 
 public:
     StringFormPolynomial();
-    StringFormPolynomial(int ord, const std::vector<double>& coeffs);
+    StringFormPolynomial(int ord, const double* coeffs);
     StringFormPolynomial(const StringFormPolynomial& other);
     
     void updateFormattedString();

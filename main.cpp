@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include <limits>
 #include "polynomial.h"
 #include "extended_polynomial.h"
@@ -19,7 +18,7 @@ void lab6_demo();
 void lab7_demo();
 void lab8_demo();
 Polynomial inputPolynomial();
-vector<double> inputCoefficients(int order);
+double* inputCoefficients(int order, int& count);
 void displayPolynomialInfo(const Polynomial& poly);
 
 int main() {
@@ -61,15 +60,16 @@ int main() {
 }
 
 // Функция для ввода коэффициентов
-vector<double> inputCoefficients(int order) {
-    vector<double> coefficients;
-    cout << "Enter " << (order + 1) << " coefficients (from constant term to highest degree):" << endl;
+double* inputCoefficients(int order, int& count) {
+    count = order + 1;
+    double* coefficients = new double[count];
+    cout << "Enter " << count << " coefficients (from constant term to highest degree):" << endl;
     
-    for (int i = 0; i <= order; i++) {
+    for (int i = 0; i < count; i++) {
         double coeff;
         cout << "Coefficient for x^" << i << ": ";
         cin >> coeff;
-        coefficients.push_back(coeff);
+        coefficients[i] = coeff;
     }
     
     return coefficients;
@@ -86,8 +86,11 @@ Polynomial inputPolynomial() {
         order = 0;
     }
     
-    vector<double> coefficients = inputCoefficients(order);
-    return Polynomial(order, coefficients);
+    int count;
+    double* coefficients = inputCoefficients(order, count);
+    Polynomial poly(order, coefficients);
+    delete[] coefficients;
+    return poly;
 }
 
 // Функция для отображения информации о многочлене
@@ -96,13 +99,14 @@ void displayPolynomialInfo(const Polynomial& poly) {
     cout << "Degree: " << poly.getOrder() << endl;
     
     // Вывод коэффициентов
-    vector<double> coeffs = poly.getCoefficients();
+    double* coeffs = poly.getCoefficients();
     cout << "Coefficients: ";
-    for (size_t i = 0; i < coeffs.size(); i++) {
+    for (int i = 0; i <= poly.getOrder(); i++) {
         cout << coeffs[i];
-        if (i < coeffs.size() - 1) cout << ", ";
+        if (i < poly.getOrder()) cout << ", ";
     }
     cout << endl;
+    delete[] coeffs;
 }
 
 void lab1_demo() {
@@ -204,8 +208,8 @@ void lab3_demo() {
     cin >> p2;
     cout << "You entered: " << p2 << endl;
     
-    // Работа с файлами
-    cout << "\n--- File Operations ---" << endl;
+    // Работа с файлами через операторы
+    cout << "\n--- File Operations with Operators ---" << endl;
     string filename;
     
     cout << "Enter filename for text file (without extension): ";
@@ -213,21 +217,34 @@ void lab3_demo() {
     string textFile = filename + ".txt";
     string binaryFile = filename + ".bin";
     
-    p1.saveToTextFile(textFile);
+    // Сохранение в текстовый файл через оператор <<
+    std::ofstream outFile(textFile);
+    if (outFile.is_open()) {
+        outFile << p1;
+        outFile.close();
+        cout << "Polynomial saved to " << textFile << " using operator<<" << endl;
+    }
+    
+    // Сохранение в бинарный файл (старый метод)
     p1.saveToBinaryFile(binaryFile);
-    cout << "Polynomial saved to " << textFile << " and " << binaryFile << endl;
+    cout << "Polynomial saved to " << binaryFile << " using saveToBinaryFile" << endl;
     
-    // Загрузка из файлов
+    // Загрузка из текстового файла через оператор >>
     Polynomial p3, p4;
-    p3.loadFromTextFile(textFile);
-    p4.loadFromBinaryFile(binaryFile);
+    std::ifstream inFile(textFile);
+    if (inFile.is_open()) {
+        inFile >> p3;
+        inFile.close();
+        cout << "Loaded from text file using operator>>: " << p3 << endl;
+    }
     
-    cout << "Loaded from text file: " << p3 << endl;
-    cout << "Loaded from binary file: " << p4 << endl;
+    // Загрузка из бинарного файла (старый метод)
+    p4.loadFromBinaryFile(binaryFile);
+    cout << "Loaded from binary file using loadFromBinaryFile: " << p4 << endl;
     
     // Проверка корректности
     if (p1.toString() == p3.toString() && p1.toString() == p4.toString()) {
-        cout << "File operations completed successfully!" << endl;
+        cout << "All file operations completed successfully!" << endl;
     } else {
         cout << "Error in file operations!" << endl;
     }
@@ -236,13 +253,13 @@ void lab3_demo() {
 void lab4_demo() {
     std::cout << "\n=== Lab 4: Inheritance ===" << std::endl;
     
-    std::vector<double> coeffs = {1.0, 2.0, 3.0};
-    std::vector<int> powers = {0, 1, 2};
+    double coeffs[] = {1.0, 2.0, 3.0};
+    int powers[] = {0, 1, 2};
     
     Polynomial basePoly(2, coeffs);
     std::cout << "Base polynomial: " << basePoly.toString() << std::endl;
     
-    PowerArrayPolynomial powerPoly(2, coeffs, powers);
+    PowerArrayPolynomial powerPoly(2, coeffs, powers, 3);
     std::cout << "Power array polynomial: " << powerPoly.toString() << std::endl;
     
     StringFormPolynomial stringPoly(2, coeffs);
@@ -263,13 +280,13 @@ void lab5_demo() {
     
     PolynomialList list;
 
-    std::vector<double> coeffs1 = {1.0, 2.0, 3.0};
-    std::vector<double> coeffs2 = {4.0, 5.0, 6.0};
-    std::vector<int> powers = {0, 1, 2};
+    double coeffs1[] = {1.0, 2.0, 3.0};
+    double coeffs2[] = {4.0, 5.0, 6.0};
+    int powers[] = {0, 1, 2};
     
     list.add(new Polynomial(2, coeffs1));
-    list.add(new PowerArrayPolynomial(2, coeffs2, powers));
-    list.add(new StringFormPolynomial(1, {7.0, 8.0}));
+    list.add(new PowerArrayPolynomial(2, coeffs2, powers, 3));
+    list.add(new StringFormPolynomial(1, new double[2]{7.0, 8.0}));
     
     list.displayAll();
     
@@ -289,7 +306,7 @@ void lab5_demo() {
 void lab6_demo() {
     std::cout << "\n=== Lab 6: Exception Handling ===" << std::endl;
     
-    std::vector<double> coeffs = {1.0, 2.0, 3.0};
+    double coeffs[] = {1.0, 2.0, 3.0};
     Polynomial p(2, coeffs);
     
     std::cout << "Normal evaluation at x=2: " << p.safeEvaluate(2.0) << std::endl;
@@ -310,13 +327,13 @@ void lab7_demo() {
     int order;
     cin >> order;
     
-    vector<int> intCoeffs;
+    int* intCoeffs = new int[order + 1];
     cout << "Enter " << (order + 1) << " integer coefficients:" << endl;
     for (int i = 0; i <= order; i++) {
         int coeff;
         cout << "Coefficient for x^" << i << ": ";
         cin >> coeff;
-        intCoeffs.push_back(coeff);
+        intCoeffs[i] = coeff;
     }
     
     PolynomialTemplate<int> intPoly(order, intCoeffs);
@@ -328,17 +345,19 @@ void lab7_demo() {
     cout << "Value at x=" << xInt << ": " << intPoly.evaluate(xInt) << endl;
     cout << "Using operator(): " << intPoly(xInt) << endl;
     
+    delete[] intCoeffs;
+    
     cout << "\n--- Double Polynomial ---" << endl;
     cout << "Enter order for double polynomial: ";
     cin >> order;
     
-    vector<double> doubleCoeffs;
+    double* doubleCoeffs = new double[order + 1];
     cout << "Enter " << (order + 1) << " double coefficients:" << endl;
     for (int i = 0; i <= order; i++) {
         double coeff;
         cout << "Coefficient for x^" << i << ": ";
         cin >> coeff;
-        doubleCoeffs.push_back(coeff);
+        doubleCoeffs[i] = coeff;
     }
     
     PolynomialTemplate<double> doublePoly(order, doubleCoeffs);
@@ -349,11 +368,13 @@ void lab7_demo() {
     cin >> xDouble;
     cout << "Value at x=" << xDouble << ": " << doublePoly.evaluate(xDouble) << endl;
     
+    delete[] doubleCoeffs;
+    
     // Демонстрация операторов
     cout << "\n--- Operator Demonstrations ---" << endl;
     cout << "Creating another polynomial for operations..." << endl;
     
-    vector<double> coeffs2 = {1.5, 2.5};
+    double coeffs2[] = {1.5, 2.5};
     PolynomialTemplate<double> poly2(1, coeffs2);
     cout << "Second polynomial: " << poly2.toString() << endl;
     
@@ -367,13 +388,13 @@ void lab7_demo() {
     cout << "Enter order for float polynomial: ";
     cin >> order;
     
-    vector<float> floatCoeffs;
+    float* floatCoeffs = new float[order + 1];
     cout << "Enter " << (order + 1) << " float coefficients:" << endl;
     for (int i = 0; i <= order; i++) {
         float coeff;
         cout << "Coefficient for x^" << i << ": ";
         cin >> coeff;
-        floatCoeffs.push_back(coeff);
+        floatCoeffs[i] = coeff;
     }
     
     PolynomialTemplate<float> floatPoly(order, floatCoeffs);
@@ -383,6 +404,8 @@ void lab7_demo() {
     cout << "Enter float x value: ";
     cin >> xFloat;
     cout << "Value at x=" << xFloat << ": " << floatPoly.evaluate(xFloat) << endl;
+    
+    delete[] floatCoeffs;
     
     cout << "\n--- Template Comparison ---" << endl;
     cout << "All polynomials use the same template class but with different data types!" << endl;
@@ -401,65 +424,6 @@ void lab8_demo() {
     PolynomialSTLAnalysis analysis;
     analysis.generateTestData(dataSize);
     analysis.runAllAnalysis();
-    
-    // Дополнительная демонстрация с пользовательскими данными
-    cout << "\n--- Custom STL Operations ---" << endl;
-    vector<Polynomial> customPolynomials;
-    
-    int numCustom;
-    cout << "How many polynomials do you want to add for STL operations? ";
-    cin >> numCustom;
-    
-    for (int i = 0; i < numCustom; i++) {
-        cout << "\nPolynomial " << (i + 1) << ":" << endl;
-        customPolynomials.push_back(inputPolynomial());
-    }
-    
-    // STL алгоритмы
-    cout << "\n--- STL Algorithms on Custom Data ---" << endl;
-    
-    // Поиск
-    if (!customPolynomials.empty()) {
-        cout << "Enter order to search for: ";
-        int searchOrder;
-        cin >> searchOrder;
-        
-        auto it = find_if(customPolynomials.begin(), customPolynomials.end(),
-                         [searchOrder](const Polynomial& p) { 
-                             return p.getOrder() == searchOrder; 
-                         });
-        
-        if (it != customPolynomials.end()) {
-            cout << "Found polynomial with order " << searchOrder << ": " << it->toString() << endl;
-        } else {
-            cout << "No polynomial with order " << searchOrder << " found" << endl;
-        }
-    }
-    
-    // Сортировка
-    cout << "\n--- Sorting Polynomials ---" << endl;
-    sort(customPolynomials.begin(), customPolynomials.end(),
-         [](const Polynomial& a, const Polynomial& b) {
-             return a.toString() < b.toString();
-         });
-    
-    cout << "Sorted polynomials:" << endl;
-    for (const auto& poly : customPolynomials) {
-        cout << "  " << poly.toString() << endl;
-    }
-    
-    // Подсчет
-    if (!customPolynomials.empty()) {
-        cout << "\nEnter order to count: ";
-        int countOrder;
-        cin >> countOrder;
-        
-        int count = count_if(customPolynomials.begin(), customPolynomials.end(),
-                           [countOrder](const Polynomial& p) { 
-                               return p.getOrder() == countOrder; 
-                           });
-        cout << "Number of polynomials with order " << countOrder << ": " << count << endl;
-    }
     
     cout << "\nSTL analysis completed!" << endl;
 }

@@ -2,7 +2,6 @@
 #define POLYNOMIAL_STL_H
 
 #include "polynomial.h"
-#include <vector>
 #include <list>
 #include <set>
 #include <map>
@@ -13,7 +12,8 @@
 
 class PolynomialSTLAnalysis {
 private:
-    std::vector<Polynomial> polynomialVector;
+    Polynomial** polynomialArray;
+    int arraySize;
     std::list<Polynomial> polynomialList;
     std::set<std::string> polynomialSet;
     std::multiset<std::string> polynomialMultiSet;
@@ -21,8 +21,11 @@ private:
     std::multimap<int, Polynomial> polynomialMultiMap;
 
 public:
+    PolynomialSTLAnalysis();
+    ~PolynomialSTLAnalysis();
+    
     void generateTestData(int count);
-    void analyzeVectorOperations();
+    void analyzeArrayOperations();
     void analyzeSetOperations();
     void runAllAnalysis();
     
