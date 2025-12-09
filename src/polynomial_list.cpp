@@ -1,4 +1,4 @@
-#include "polynomial_list.h"
+#include "../include/polynomial_list.h"
 #include <iostream>
 
 PolynomialList::PolynomialList() : head(nullptr), tail(nullptr), size(0) {}

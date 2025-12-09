@@ -1,4 +1,4 @@
-#include "extended_polynomial.h"
+#include "../include/extended_polynomial.h"
 #include <sstream>
 
 // PowerArrayPolynomial implementation

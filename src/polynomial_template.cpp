@@ -1,4 +1,4 @@
-#include "polynomial_template.h"
+#include "../include/polynomial_template.h"
 #include <sstream>
 #include <iomanip>
 

@@ -1,4 +1,4 @@
-#include "polynomial.h"
+#include "../include/polynomial.h"
 #include <sstream>
 #include <iomanip>
 
@@ -12,8 +12,13 @@ Polynomial::Polynomial() : order(0) {
 }
 
 Polynomial::Polynomial(int ord, const double* coeffs) : order(ord) {
+    if (ord < 0) throw PolynomialException("Order can not be nagetive");
     coefficients = new double[order + 1];
+
+    if (coefficients == nullptr) throw PolynomialException("Memory allocation error");
+
     for (int i = 0; i <= order; i++) {
+        if (std::isnan(coeffs[i]) || std::isinf(coeffs[i])) throw PolynomialException("Invalid coefficient value");
         coefficients[i] = coeffs[i];
     }
     objectCount++;
@@ -39,6 +44,7 @@ int Polynomial::getOrder() const {
 
 double* Polynomial::getCoefficients() const {
     double* copy = new double[order + 1];
+    if (copy == nullptr) throw PolynomialException("Memory allocation error");
     for (int i = 0; i <= order; i++) {
         copy[i] = coefficients[i];
     }
@@ -46,15 +52,25 @@ double* Polynomial::getCoefficients() const {
 }
 
 void Polynomial::setCoefficients(int ord, const double* coeffs) {
+    if (ord < 0) throw PolynomialException("Order can not be negative");
+    if (coeffs == nullptr) throw PolynomialException("Coefficients array is null");
+
     delete[] coefficients;
     order = ord;
     coefficients = new double[order + 1];
+
+    if (coefficients == nullptr) throw PolynomialException("Memory allocation error");
+
     for (int i = 0; i <= order; i++) {
+        if (std::isnan(coeffs[i]) || std::isinf(coeffs[i])) throw PolynomialException("Invalid coefficient value");
         coefficients[i] = coeffs[i];
     }
 }
 
 double Polynomial::evaluate(double x) const {
+    if (std::isnan(x) || std::isinf(x)) {
+            throw PolynomialException("Invalid x value for evaluation");
+    }
     double result = 0.0;
     double power = 1.0;
     
@@ -109,6 +125,9 @@ std::string Polynomial::toString() const {
 
 void Polynomial::increaseDegree() {
     double* newCoeffs = new double[order + 2];
+
+    if (newCoeffs == nullptr) throw PolynomialException("Memory allocation error");
+
     newCoeffs[0] = 0.0;
     for (int i = 0; i <= order; i++) {
         newCoeffs[i + 1] = coefficients[i];
@@ -121,6 +140,9 @@ void Polynomial::increaseDegree() {
 void Polynomial::decreaseDegree() {
     if (order > 0) {
         double* newCoeffs = new double[order];
+
+        if (newCoeffs == nullptr) throw PolynomialException("Memory allocation error");
+
         for (int i = 0; i < order; i++) {
             newCoeffs[i] = coefficients[i + 1];
         }
@@ -138,11 +160,20 @@ int Polynomial::getObjectCount() {
 Polynomial Polynomial::operator+(const Polynomial& other) const {
     int maxOrder = std::max(order, other.order);
     double* resultCoeffs = new double[maxOrder + 1];
+
+    if (resultCoeffs == nullptr) throw PolynomialException("Memory allocation error");  
     
     for (int i = 0; i <= maxOrder; i++) {
         double coeff1 = (i <= order) ? coefficients[i] : 0.0;
         double coeff2 = (i <= other.order) ? other.coefficients[i] : 0.0;
-        resultCoeffs[i] = coeff1 + coeff2;
+        double sum = coeff1 + coeff2;
+
+        if (std::isinf(sum)) {
+            delete[] resultCoeffs;
+            throw PolynomialException("Arithmetic overflow in addition");
+        }
+
+        resultCoeffs[i] = sum;
     }
     
     Polynomial result(maxOrder, resultCoeffs);
@@ -153,11 +184,18 @@ Polynomial Polynomial::operator+(const Polynomial& other) const {
 Polynomial Polynomial::operator-(const Polynomial& other) const {
     int maxOrder = std::max(order, other.order);
     double* resultCoeffs = new double[maxOrder + 1];
+
+    if (resultCoeffs == nullptr) throw PolynomialException("Memory allocation error");
     
     for (int i = 0; i <= maxOrder; i++) {
         double coeff1 = (i <= order) ? coefficients[i] : 0.0;
         double coeff2 = (i <= other.order) ? other.coefficients[i] : 0.0;
-        resultCoeffs[i] = coeff1 - coeff2;
+        double diff = coeff1 - coeff2;
+
+        if (std::isinf(diff)) {
+            delete[] resultCoeffs;
+            throw PolynomialException("Arithmetic overflow in difference");
+        }
     }
     
     Polynomial result(maxOrder, resultCoeffs);
@@ -188,10 +226,16 @@ Polynomial Polynomial::operator--(int) {
 }
 
 Polynomial operator+(double num, const Polynomial& other) {
+    if (std::isnan(num) || std::isinf(num)) throw PolynomialException("Invalid addition number value");
+
     int order = other.order;
     double* resultCoeffs = new double[order + 1];
 
-    resultCoeffs[0] = other.coefficients[0] + num;
+    if (resultCoeffs == nullptr) throw PolynomialException("Memory allocation error");
+
+    double sum = other.coefficients[0] + num;
+
+    if (std::isinf(sum)) throw PolynomialException("Arithmetic overflow in addition");
 
     for (int i = 1; i < order; i++) {
         resultCoeffs[i] = other.coefficients[i];
@@ -207,16 +251,20 @@ double Polynomial::operator()(double x) const {
 
 double Polynomial::operator[](int index) const {
     if (index < 0 || index > order) {
-        return 0.0;
+        throw PolynomialException("Index out of bounds");
     }
     return coefficients[index];
 }
 
 Polynomial& Polynomial::operator=(const Polynomial& other) {
+    // Потенциально проверка на NULL
     if (this != &other) {
         delete[] coefficients;
         order = other.order;
         coefficients = new double[order + 1];
+
+        if (coefficients == nullptr) throw PolynomialException("Memory allocation error");
+
         for (int i = 0; i <= order; i++) {
             coefficients[i] = other.coefficients[i];
         }
@@ -225,6 +273,7 @@ Polynomial& Polynomial::operator=(const Polynomial& other) {
 }
 
 bool Polynomial::operator==(const Polynomial& other) const {
+    // Потенциально проверка на NULL
     if (order != other.order) {
         return false;
     }
@@ -239,6 +288,7 @@ bool Polynomial::operator==(const Polynomial& other) const {
 }
 
 bool Polynomial::operator!=(const Polynomial& other) const {
+    // Потенциально проверка на NULL
     return !(*this == other);
 }
 
@@ -249,16 +299,33 @@ std::ostream& operator<<(std::ostream& os, const Polynomial& poly) {
 }
 
 std::istream& operator>>(std::istream& is, Polynomial& poly) {
+    int newOrder = -1;
+    
     std::cout << "Enter the order (degree) of the polynomial: ";
-    is >> poly.order;
+    is >> newOrder;
+
+    if (newOrder < 0) throw PolynomialException("Order can not be negative");
     
-    delete[] poly.coefficients;
-    poly.coefficients = new double[poly.order + 1];
+    if (is.fail()) throw PolynomialException("Invalid input for order"); 
+
+    double* newCoeffs = new double[newOrder + 1];
+
+    if (newCoeffs == nullptr) throw PolynomialException("Memoty allocation error");
+
+    poly.coefficients = newCoeffs;
     
-    std::cout << "Enter " << (poly.order + 1) << " coefficients: ";
+    std::cout << "Enter " << (newOrder + 1) << " coefficients: ";
     for (int i = 0; i <= poly.order; i++) {
-        is >> poly.coefficients[i];
+        is >> newCoeffs[i];
+        if (is.fail() || std::isnan(newCoeffs[i]) || std::isinf(newCoeffs[i])) {
+            delete[] newCoeffs;
+            throw PolynomialException("Invalid coefficient value");
+        }
     }
+    
+    poly.coefficients = newCoeffs;
+    poly.order = newOrder;
+    delete[] poly.coefficients;
     
     return is;
 }
@@ -270,6 +337,8 @@ std::ofstream& operator<<(std::ofstream& ofs, const Polynomial& poly) {
             ofs << poly.coefficients[i] << " ";
         }
         ofs << std::endl;
+    } else {
+        throw PolynomialException("Text file write error");
     }
     return ofs;
 }
@@ -282,6 +351,8 @@ std::ifstream& operator>>(std::ifstream& ifs, Polynomial& poly) {
         for (int i = 0; i <= poly.order; i++) {
             ifs >> poly.coefficients[i];
         }
+    } else {
+        throw PolynomialException("Text file read error");
     }
     return ifs;
 }
@@ -295,6 +366,8 @@ void Polynomial::saveToTextFile(const std::string& filename) const {
         }
         file << std::endl;
         file.close();
+    } else {
+        throw PolynomialException("Text file write error");
     }
 }
 
@@ -308,6 +381,8 @@ void Polynomial::loadFromTextFile(const std::string& filename) {
             file >> coefficients[i];
         }
         file.close();
+    } else {
+        throw PolynomialException("Text file read error");
     }
 }
 
@@ -319,6 +394,8 @@ void Polynomial::saveToBinaryFile(const std::string& filename) const {
             file.write(reinterpret_cast<const char*>(&coefficients[i]), sizeof(coefficients[i]));
         }
         file.close();
+    } else {
+        throw PolynomialException("Bin file write error");
     }
 }
 
@@ -332,47 +409,49 @@ void Polynomial::loadFromBinaryFile(const std::string& filename) {
             file.read(reinterpret_cast<char*>(&coefficients[i]), sizeof(coefficients[i]));
         }
         file.close();
+    } else {
+        throw PolynomialException("Bin file read error");
     }
 }
 
-// Exceptions
-double Polynomial::safeEvaluate(double x) const {
-    try {
-        if (std::isnan(x) || std::isinf(x)) {
-            throw PolynomialException("Invalid x value for evaluation");
-        }
-        return evaluate(x);
-    }
-    catch (const PolynomialException& e) {
-        std::cerr << "Evaluation error: " << e.what() << std::endl;
-        return 0.0;
-    }
-}
+// // Exceptions
+// double Polynomial::safeEvaluate(double x) const {
+//     try {
+//         if (std::isnan(x) || std::isinf(x)) {
+//             throw PolynomialException("Invalid x value for evaluation");
+//         }
+//         return evaluate(x);
+//     }
+//     catch (const PolynomialException& e) {
+//         std::cerr << "Evaluation error: " << e.what() << std::endl;
+//         return 0.0;
+//     }
+// }
 
-double Polynomial::safeGetCoefficient(int index) const {
-    try {
-        if (index < 0 || index > order) {
-            throw PolynomialException("Index out of bounds");
-        }
-        return coefficients[index];
-    }
-    catch (const PolynomialException& e) {
-        std::cerr << "Coefficient access error: " << e.what() << std::endl;
-        return 0.0;
-    }
-}
+// double Polynomial::safeGetCoefficient(int index) const {
+//     try {
+//         if (index < 0 || index > order) {
+//             throw PolynomialException("Index out of bounds");
+//         }
+//         return coefficients[index];
+//     }
+//     catch (const PolynomialException& e) {
+//         std::cerr << "Coefficient access error: " << e.what() << std::endl;
+//         return 0.0;
+//     }
+// }
 
-void Polynomial::safeSetCoefficient(int index, double value) {
-    try {
-        if (index < 0 || index > order) {
-            throw PolynomialException("Index out of bounds");
-        }
-        if (std::isnan(value) || std::isinf(value)) {
-            throw PolynomialException("Invalid coefficient value");
-        }
-        coefficients[index] = value;
-    }
-    catch (const PolynomialException& e) {
-        std::cerr << "Coefficient setting error: " << e.what() << std::endl;
-    }
-}
+// void Polynomial::safeSetCoefficient(int index, double value) {
+//     try {
+//         if (index < 0 || index > order) {
+//             throw PolynomialException("Index out of bounds");
+//         }
+//         if (std::isnan(value) || std::isinf(value)) {
+//             throw PolynomialException("Invalid coefficient value");
+//         }
+//         coefficients[index] = value;
+//     }
+//     catch (const PolynomialException& e) {
+//         std::cerr << "Coefficient setting error: " << e.what() << std::endl;
+//     }
+// }

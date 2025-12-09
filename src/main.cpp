@@ -1,10 +1,10 @@
 #include <iostream>
 #include <limits>
-#include "polynomial.h"
-#include "extended_polynomial.h"
-#include "polynomial_list.h"
-#include "polynomial_template.h"
-#include "polynomial_stl.h"
+#include "../include/polynomial.h"
+#include "../include/extended_polynomial.h"
+#include "../include/polynomial_list.h"
+#include "../include/polynomial_template.h"
+#include "../include/polynomial_stl.h"
 
 using namespace std;
 
@@ -305,18 +305,46 @@ void lab5_demo() {
 
 void lab6_demo() {
     std::cout << "\n=== Lab 6: Exception Handling ===" << std::endl;
-    
-    double coeffs[] = {1.0, 2.0, 3.0};
-    Polynomial p(2, coeffs);
-    
-    std::cout << "Normal evaluation at x=2: " << p.safeEvaluate(2.0) << std::endl;
-    
-    std::cout << "Evaluation with invalid x: " << p.safeEvaluate(std::numeric_limits<double>::quiet_NaN()) << std::endl;
-    std::cout << "Access to invalid coefficient: " << p.safeGetCoefficient(10) << std::endl;
-    
-    p.safeSetCoefficient(1, std::numeric_limits<double>::infinity());
+    try {
+        // Test constructor
+        double coeffs1[] = {1.0, 2.0, 3.0};
+        Polynomial p1(2, coeffs1);
+        std::cout << "P1: " << p1 << std::endl;
 
-    std::cout << "Coefficient[1] after invalid set: " << p.safeGetCoefficient(1) << std::endl;
+        // Test evaluation
+        double result = p1.evaluate(2.0);
+        std::cout << "P1(2) = " << result << std::endl;
+
+        // Test operator[]
+        double coeff = p1[1];
+        std::cout << "Coefficient at index 1: " << coeff << std::endl;
+
+        // Test arithmetic operations
+        double coeffs2[] = {2.0, 1.0};
+        Polynomial p2(1, coeffs2);
+        Polynomial p3 = p1 + p2;
+        std::cout << "P1 + P2: " << p3 << std::endl;
+
+        // Test file operations
+        p1.saveToTextFile("polynomial.txt");
+        Polynomial p4;
+        p4.loadFromTextFile("polynomial.txt");
+        std::cout << "Loaded from file: " << p4 << std::endl;
+
+        // Test edge cases
+        // double invalid_coeffs[] = {1.0, std::numeric_limits<double>::infinity()};
+
+        // Polynomial p5(1, invalid_coeffs);
+
+    } catch (const PolynomialException& e) {
+        std::cerr << "Polynomial exception: " << e.what() << std::endl;
+        return;
+    } catch (...) {
+        std::cerr << "Unknown exception occurred" << std::endl;
+        return;
+    }
+
+    std::cout << "Program completed successfully" << std::endl;
 }
 
 void lab7_demo() {
